@@ -1,0 +1,21 @@
+{% extends 'kalm_quizes/base_template.html' %}
+
+{% block head %}
+<title>Список доступных курсов</title>
+{% endblock %}
+
+
+
+
+{% block content %}
+{% if quizes_list %}
+        <ul>
+            {% for quiz in quizes_list %}
+            <li><a href="{% url 'kalm_quizes:quiz_page' quiz.id %}">Курс №{{quiz.quiz_number}}: {{quiz.quiz_name}}</a></li>
+            {% endfor %}
+            </ul>
+    {% else %}
+        <p>На данный момент курсы недоступны</p>
+    {%  endif %}
+
+{% endblock %}

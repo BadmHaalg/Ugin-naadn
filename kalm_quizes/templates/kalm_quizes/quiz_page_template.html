@@ -1,0 +1,30 @@
+{% extends 'kalm_quizes/base_template.html' %}
+
+{% block head %}
+    <title>Курс № {{ quiz.quiz_number}} {{quiz.quiz_name}}</title>
+{% endblock %}
+
+{% block content %}
+    <h1>{{quiz.quiz_name}}</h1>
+
+    <h3>Вопросы с одним вариантом ответа</h3>
+        <ul>
+        {% for single_choice in single_choices_list %}
+            <li><a href="{% url 'kalm_quizes:single_choice_page' quiz.id single_choice.question_number %}">Вопрос №{{ single_choice.question_number}}</a></li>
+        {% endfor %}
+        </ul>
+    <h3>Вопросы с несколькими вариантами ответа</h3>
+         <ul>
+        {% for multiple_choice in multiple_choices_list %}
+            <li>Вопрос №{{ multiple_choice.question_number }}</li>
+        {% endfor %}
+        </ul>
+    <h3>Задания на порядок слов</h3>
+         <ul>
+        {% for put_in_order in put_in_order_list %}
+             <li><a href="{% url 'kalm_quizes:put_in_order_page' quiz.id put_in_order.question_number %}">Вопрос №{{ put_in_order.question_number }}</a></li>
+        {% endfor %}
+        </ul>
+
+    <p>Нужно еще добавить: нумерацию вопросов (через _set.count() и проверку на существование _set)</p>
+{% endblock %}
