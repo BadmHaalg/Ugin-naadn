@@ -45,26 +45,22 @@ def put_in_order_check(request, quiz_id, put_in_order_id):
     quiz = get_object_or_404(Quiz, pk=quiz_id)
     question = quiz.putinorder_set.get(question_number=put_in_order_id)
     words_set = set(question.text_for_ordering.split())
+    rr = [i for i in range(len(words_set))]
     context = {'quiz': quiz,
                'question': question,
                'text': words_set,
-               'range': range(len(words_set)),
+               'range': rr,
                }
     words_list = []
-    words_dict = dict()
     for i in range(len(words_set)):
         name = f'word{i}'
         selected_word = request.POST[name]
         words_list.append(selected_word)
-        words_dict[i] = selected_word
-        context['words_list'] = words_list
     if words_list == question.text_for_ordering.split():
-        context['words_dict'] = words_dict
         context['message'] = 'Верно!'
     elif 'none' in words_list:
         context['message'] = 'Заполните все ячейки!'
     else:
-        context['words_dict'] = words_dict
         context['message'] = 'Пока неправильно, пробуйте еще!'
 
     return render(request, 'kalm_quizes/order_template.html', context)

@@ -7,25 +7,17 @@
     <fieldset>
         <legend><h3>{{question.question_text}}</h3></legend>
         {% for i in range %}
-        <p>i равно {{i}} </p>
-        <p> {{words_dict.1}} </p>
-        <p> {{words_list.i}} </p>
             <select name="word{{i}}">
-                <option value="none" selected>Слово {{i}}</option>
+                <option value="none" selected></option>
             {% for word in text %}
-                {% if words_dict.i == word %}
-                    <option value="{{word}}">{{word}} ДА!</option>
-                {% else %}
-                    <option value="{{word}}">{{word}}</option>
-                {% endif %}
+                <option value="{{word}}">{{word}}</option>
             {% endfor %}
             </select>
         {% endfor %}
     </fieldset>
     <input type="submit" value="Ответить">
 </form>
-<h4>{{message}}</h4>
-<h3>{{words_dict}}</h3>
-<h3>{{words_list}}</h3>
+
+<h2>{{message}}</h2>
 
 {% endblock %}
