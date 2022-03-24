@@ -4,13 +4,13 @@ from django.contrib import admin
 from .models import *
 
 
-class SingleChoiceInline(admin.TabularInline):
+class SingleChoiceInline(admin.StackedInline):
     model = SingleChoice
     extra = 0
 
 
-class MultipleChoiceInline(admin.TabularInline):
-    model = MultipleChoice
+class PutInGapsInline(admin.StackedInline):
+    model = PutInGaps
     extra = 0
 
 
@@ -21,7 +21,7 @@ class PutInOrderInline(admin.StackedInline):
 
 class QuizAdmin(admin.ModelAdmin):
     fields = ['quiz_number', 'quiz_name']
-    inlines = [SingleChoiceInline, MultipleChoiceInline, PutInOrderInline]
+    inlines = [SingleChoiceInline, PutInOrderInline, PutInGapsInline]
     list_display = ('quiz_number', 'quiz_name')
     list_filter = ['quiz_number']
 

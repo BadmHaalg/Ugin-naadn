@@ -1,13 +1,14 @@
-{% extends 'kalm_quizes/base_template.html' %}
+{% extends 'kalm_quizes/base_template_1.html' %}
 
 {% block head %}
-<title>Список доступных курсов</title>
+<title>{{title}}</title>
 {% endblock %}
 
 
 
-
 {% block content %}
+<h1>{{title}}</h1>
+
 {% if quizes_list %}
         <ul>
             {% for quiz in quizes_list %}

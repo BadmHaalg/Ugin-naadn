@@ -1,0 +1,49 @@
+{% extends 'kalm_quizes/base_template_1.html' %}
+{% load quizes_extras %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+
+<p>
+{% for el in text_split %}
+    {% if el == '___' %}
+        {% if words_dict %}
+            {% get_dict_val words_dict forloop.counter as selected_word %}
+        {% endif %}
+        <select name="{{forloop.counter}}" form="this">
+            <option value="none"></option>
+            {% for word in choices_list %}
+                {% if word == selected_word %}
+                    <option value="{{word}}" selected>{{word}}</option>
+                {% else %}
+                    <option value="{{word}}">{{word}}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+    {% else %}
+        {{el}}
+    {% endif %}
+
+{% endfor %}
+</p>
+<form action="{% url 'kalm_quizes:put_in_gaps_page' quiz.id question.question_number %}" method="post" id="this">
+    {% csrf_token %}
+</form>
+
+{% if question.question_number|add:'-1' > single_choice_count|add:put_in_order_count %}
+    <a href="{% url 'kalm_quizes:put_in_gaps_page' quiz.id question.question_number|add:'-1' %}">Предыдущий</a>
+{% else %}
+    <a href="{% url 'kalm_quizes:put_in_order_page' quiz.id question.question_number|add:'-1' %}">Предыдущий</a>
+{% endif %}
+<input type="submit" value="Ответить" form="this">
+{% if question.question_number < sum %}
+    <a href="{% url 'kalm_quizes:put_in_gaps_page' quiz.id question.question_number|add:'1' %}">Следующий</a>
+{% endif %}
+<hr>
+<a href="{% url 'kalm_quizes:quiz_page' quiz.id %}">Cтраница курса</a>
+
+<h1>{{message}}</h1>
+<h3>{{answer_status.result}}</h3>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'kalm_quizes/base_template_1.html' %}
+
+{% block content %}
+<h1>Переведите и расставьте слова по порядку:</h1><br>
+<form action="{% url 'kalm_quizes:put_in_order_page' quiz.id question.question_number %}" method="post" id="s">
+    {% csrf_token %}
+    <fieldset>
+        <legend><h3>{{question.question_text}}</h3></legend>
+        {% for i in range %}
+            <select name="word{{forloop.counter}}">
+                <option value="none"></option>
+            {% for word in text %}
+                {% if i == word %}
+                    <option value="{{word}}" selected>{{word}}</option>
+                {% else %}
+                    <option value="{{word}}">{{word}}</option>
+                {% endif %}
+                {% endfor %}
+            </select>
+        {% endfor %}
+    </fieldset>
+</form>
+
+{% if question.question_number > quiz.single_choice_count|add:'1' %}
+    <a href="{% url 'kalm_quizes:put_in_order_page' quiz.id question.question_number|add:'-1' %}">Предыдущий</a>
+{% else %}
+    <a href="{% url 'kalm_quizes:single_choice_page' quiz.id question.question_number|add:'-1' %}">Предыдущий</a>
+{% endif %}
+<input type="submit" value="Ответить" form="s">
+{% if question.question_number|add:put_in_gaps_count != sum %}
+    <a href="{% url 'kalm_quizes:put_in_order_page' quiz.id question.question_number|add:'1' %}">Следующий</a>
+{% else %}
+    <a href="{% url 'kalm_quizes:put_in_gaps_page' quiz.id question.question_number|add:'1' %}">Следующий</a>
+{% endif %}
+<hr>
+<a href="{% url 'kalm_quizes:quiz_page' quiz.id %}">Cтраница курса</a>
+
+
+<h2>результат - {{message}}</h2>
+<h3>{{answer_status.result}}</h3>
+
+{% endblock %}

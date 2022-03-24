@@ -1,110 +1,257 @@
+from django.urls import reverse_lazy
 from django.utils.datastructures import MultiValueDictKeyError
 from django.views import generic
 from django.shortcuts import get_object_or_404, render
 # Create your views here.
-
+from .forms import RegisterUserForm
 from .models import *
 
+from random import shuffle
 
-class IndexView(generic.ListView):
-    template_name = 'kalm_quizes/index.html'
-    context_object_name = 'quizes_list'
-
-    def get_queryset(self):
-        return Quiz.objects.all()
+menu = ['Главная', 'Курсы', 'Глоссарий', 'О проекте', 'Список задач', 'Войти']  # через список словарей удобней
 
 
-def quiz_page(request, quiz_id):
+def index_page(request):
+    title = 'Список курсов'
+    quizes_list = Quiz.objects.all()
+    context = {
+        'title': title,
+        'menu': menu,
+        'quizes_list': quizes_list
+    }
+    return render(request, 'kalm_quizes/index.html', context)
+
+
+def about_page(request):
+    title = 'О проекте'
+    text = 'Здесь будет размещаться информация о проекте, планы и прочее'
+    context = {
+        'title': title,
+        'text': text,
+    }
+    return render(request, 'kalm_quizes/about.html', context)
+
+
+def glossary_page(request):
+    text = """Планируем здесь сделать грамматический справочник,
+            который будет расширяться по мере добавления курсов.
+            Глоссарий и курсы должны дополнять друг друга, содержать взаимные ссылки.
+            То есть глоссарий - раздел с теорией, а курсы - практическое её освоение.
+            Глоссарий необязательно подает информацию в текстовом варианте - любые формы
+            (аудио, видео в разных подачах) приветствуются.
+                """
+    title = 'Глоссарий'
+    context = {
+        'title': title,
+        'text': text,
+    }
+
+    return render(request, 'kalm_quizes/glossary.html', context)
+
+
+def get_quiz_stat(request):
+    """счетчик прогресса
+    по сути по каждому вопросу для каждого
+    пользователя в каждом курсе хранится результат
+    0 - неправильно или ответ не дан
+    1 - правильно"""
+    if request.user.is_authenticated:
+        quizes_stat = []
+        user_profile_records = request.user.usercourseprofile_set.all()
+        for rec in user_profile_records:
+            right_answers_count = len(UserCourseAnswers.objects.filter(user=rec.user_id,
+                                                                       quiz=rec.quiz_id,
+                                                                       result=1))
+            quiz = Quiz.objects.get(pk=rec.quiz_id)
+            quizes_stat.append((quiz, right_answers_count))
+    else:
+        quizes_stat = None
+
+    return quizes_stat
+
+
+def profile_page(request):
+    context = {
+        'request': request,
+        'quizes_stat': get_quiz_stat(request),
+    }
+    return render(request, 'kalm_quizes/profile_page.html', context)
+
+
+def user_profile_decorator(func):
+    """создает обьект UserCourseProfile(т.е. записывает
+     пользователя на курс), когда пользователь заходит
+      на страницу курса. Желательно вывести в отдельную
+      кнопку ЗАПИСАТЬСЯ НА КУРС"""
+    def quiz_page_wrapper(request, quiz_id):
+        user_pk = request.user.pk
+        profile = None
+        if request.user.is_authenticated:
+            try:
+                profile = UserCourseProfile.objects.get(user_id=user_pk, quiz_id=quiz_id)
+            except UserCourseProfile.DoesNotExist:
+                profile = UserCourseProfile.objects.create(quiz_id=quiz_id, user_id=user_pk)
+        return func(request, quiz_id, profile)
+
+    return quiz_page_wrapper
+
+
+def answer_decorator(question_page):
+    """отвечает за изменение счетчика прогресса при нажатии кнопки ОТВЕТИТЬ"""
+    def question_wrapper(request, quiz_id, question_id):
+        user_pk = request.user.pk
+        answer_status = None
+        if request.user.is_authenticated:
+            try:
+                answer_status = UserCourseAnswers.objects.get(user=user_pk,
+                                                              quiz=quiz_id,
+                                                              question=question_id)
+            except UserCourseAnswers.DoesNotExist:
+                answer_status = UserCourseAnswers.objects.create(user=user_pk,
+                                                                 quiz=quiz_id,
+                                                                 question=question_id)
+        return question_page(request, quiz_id, question_id, answer_status)
+    return question_wrapper
+
+
+@user_profile_decorator
+def quiz_page(request, quiz_id, profile):
+    """страница курса"""
     quiz = get_object_or_404(Quiz, pk=quiz_id)
     single_choices_list = quiz.singlechoice_set.all()
-    multiple_choices_list = quiz.multiplechoice_set.all()
+    put_in_gaps_list = quiz.putingaps_set.all()
     put_in_order_list = quiz.putinorder_set.all()
     context = {
+        'menu': menu,
         'quiz': quiz,
         'single_choices_list': single_choices_list,
-        'multiple_choices_list': multiple_choices_list,
         'put_in_order_list': put_in_order_list,
+        'put_in_gaps_list': put_in_gaps_list,
+        'profile': profile,
+        'quizes_stat': get_quiz_stat(request)
+
     }
 
     return render(request, 'kalm_quizes/quiz_page_template.html', context)
 
 
-def put_in_order_page(request, quiz_id, put_in_order_id):
+@answer_decorator
+def single_choice_page(request, quiz_id, question_id, answer_status):
     quiz = get_object_or_404(Quiz, pk=quiz_id)
-    question = quiz.putinorder_set.get(question_number=put_in_order_id)
-    words_set = set(question.text_for_ordering.split())
-    context = {'quiz': quiz,
-               'question': question,
-               'text': words_set,
-               'range': range(len(words_set))}
-
-    return render(request, 'kalm_quizes/order_template.html', context)
-
-
-def put_in_order_check(request, quiz_id, put_in_order_id):
-    quiz = get_object_or_404(Quiz, pk=quiz_id)
-    question = quiz.putinorder_set.get(question_number=put_in_order_id)
-    words_set = set(question.text_for_ordering.split())
-    rr = [i for i in range(len(words_set))]
-    context = {'quiz': quiz,
-               'question': question,
-               'text': words_set,
-               'range': rr,
-               }
-    words_list = []
-    for i in range(len(words_set)):
-        name = f'word{i}'
-        selected_word = request.POST[name]
-        words_list.append(selected_word)
-    if words_list == question.text_for_ordering.split():
-        context['message'] = 'Верно!'
-    elif 'none' in words_list:
-        context['message'] = 'Заполните все ячейки!'
-    else:
-        context['message'] = 'Пока неправильно, пробуйте еще!'
-
-    return render(request, 'kalm_quizes/order_template.html', context)
-
-
-# def single_choice_page(request, quiz_id, single_choice_id):
-#     quiz = get_object_or_404(Quiz, pk=quiz_id)
-#     question = quiz.singlechoice_set.get(question_number=single_choice_id)
-#     answers_set = {question.right_answer, question.wrong_answer_1, question.wrong_answer_2, question.wrong_answer_3}
-#     context = {
-#         'quiz': quiz,
-#         'question': question,
-#         'answers_set': answers_set,
-#     }
-#
-#     return render(request, 'kalm_quizes/single_choice_template.html', context)
-
-
-def single_choice_page(request, quiz_id, single_choice_id):
-    quiz = get_object_or_404(Quiz, pk=quiz_id)
-    question = quiz.singlechoice_set.get(question_number=single_choice_id)
-    answers_set = {question.right_answer, question.wrong_answer_1, question.wrong_answer_2, question.wrong_answer_3}
+    question = quiz.singlechoice_set.get(question_number=question_id)
+    answers_set = [question.right_answer, question.wrong_answer_1, question.wrong_answer_2, question.wrong_answer_3]
+    shuffle(answers_set)
     context = {
+        'menu': menu,
         'quiz': quiz,
         'question': question,
         'answers_set': answers_set,
+        'single_choice_count': quiz.single_choice_count,
+        'put_in_order_count': quiz.put_in_order_count,
+        'put_in_gaps_count': quiz.put_in_gaps_count,
+        'sum': quiz.get_count_all,
+        'answer_status': answer_status,
+        'quizes_stat': get_quiz_stat(request)
     }
     if request.method == 'POST':
         try:
             selected_answer = request.POST['answer']
+            context['selected_answer'] = selected_answer
             if selected_answer == question.right_answer:
                 context['message'] = 'Правильно!'
-                context['selected_answer'] = selected_answer
+                if request.user.is_authenticated:
+                    answer_status.result = '1'
+                    answer_status.save()
             else:
                 context['message'] = 'Пока неправильно, пробуйте еще!'
-                context['selected_answer'] = selected_answer
         except MultiValueDictKeyError:
             context['message'] = 'Вы не выбрали ответ!'
-    else:
-        return render(request, 'kalm_quizes/single_choice_template.html', context)
 
     return render(request, 'kalm_quizes/single_choice_template.html', context)
-    # 1. Кстати да, можно перенаправлять на эту же страницу (_template), но с сообщением (как в случае)
-    # с незаполненной формой. Только вот эти вот штуки про повторную отправку формы нужно реализовать
-    # и про сохранение заполненной информации
-    # 2. Также сделать навигацию (вперед-назад по вопросам, и уже навигацию по сайту от базового шаблона )
-    # ТЕПЕРЬ РЕАЛИЗОВАТЬ С СОХРАНЕНИЕМ ЗАПОЛНЕННОЙ ФОРМЫ!!!
+
+
+@answer_decorator
+def put_in_order_page(request, quiz_id, question_id, answer_status):
+    quiz = get_object_or_404(Quiz, pk=quiz_id)
+    question = quiz.putinorder_set.get(question_number=question_id)
+    words_set = question.text_for_ordering.split()
+    shuffle(words_set)
+    context = {
+        'menu': menu,
+        'quiz': quiz,
+        'question': question,
+        'text': words_set,
+        'range': range(len(words_set)),
+        'request': request,
+        'single_choice_count': quiz.single_choice_count,
+        'put_in_order_count': quiz.put_in_order_count,
+        'put_in_gaps_count': quiz.put_in_gaps_count,
+        'sum': quiz.get_count_all,
+        'answer_status': answer_status,
+        'quizes_stat': get_quiz_stat(request)
+    }
+    if request.method == 'POST':
+        words_list = []
+        for selected_word in request.POST:
+            if selected_word != 'csrfmiddlewaretoken':
+                words_list.append(request.POST[selected_word])
+        context['range'] = words_list
+        if words_list == question.text_for_ordering.split():
+            context['message'] = 'Верно!'
+            if request.user.is_authenticated:
+                answer_status.result = '1'
+                answer_status.save()
+        elif 'none' in words_list:
+            context['message'] = 'Заполните все ячейки!'
+        else:
+            context['message'] = 'Пока неправильно, пробуйте еще!'
+
+    return render(request, 'kalm_quizes/order_template.html', context)
+
+
+@answer_decorator
+def put_in_gaps_page(request, quiz_id, question_id, answer_status):
+    quiz = get_object_or_404(Quiz, pk=quiz_id)
+    question = quiz.putingaps_set.get(question_number=question_id)
+    choices_list = question.choices_list.split()
+    shuffle(choices_list)
+    context = {
+        'menu': menu,
+        'quiz': quiz,
+        'question': question,
+        'choices_list': choices_list,
+        'text_split': question.question_text.split(),
+        'request': request,
+        'single_choice_count': quiz.single_choice_count,
+        'put_in_order_count': quiz.put_in_order_count,
+        'put_in_gaps_count': quiz.put_in_gaps_count,
+        'sum': quiz.get_count_all,
+        'answer_status': answer_status,
+        'quizes_stat': get_quiz_stat(request)
+    }
+
+    if request.method == 'POST':
+        words_list = []
+        words_dict = {}
+        for selected_word in request.POST:
+            if selected_word != 'csrfmiddlewaretoken':
+                words_list.append(request.POST[selected_word])
+                words_dict[selected_word] = request.POST[selected_word]
+        context['words_dict'] = words_dict
+        if words_list == question.right_answer.split():
+            context['message'] = 'Верно!'
+            if request.user.is_authenticated:
+                answer_status.result = '1'
+                answer_status.save()
+        elif 'none' in words_list:
+            context['message'] = 'Заполните все пропуски!'
+        else:
+            context['message'] = 'Неверно!'
+
+    return render(request, 'kalm_quizes/put_in_gaps_template.html', context)
+
+
+class RegisterUser(generic.CreateView):
+    form_class = RegisterUserForm
+    template_name = 'registration/register.html'
+    success_url = reverse_lazy('login')

@@ -1,0 +1,39 @@
+{% extends 'kalm_quizes/base_template_1.html' %}
+
+{% block head %}
+    <title>Задание № {{ question.question_number }}</title>
+{% endblock %}
+
+{% block content %}
+{% if message %}<h2>{{ message}}</h2>
+    {% endif %}
+<form action="{% url 'kalm_quizes:single_choice_page' quiz.id question.question_number %}" method="post" id="s">
+    {% csrf_token %}
+    <fieldset>
+    <legend><h1>{{question.question_text}}</h1></legend>
+        <h3> Выберите один из предложенных вариантов:</h3>
+        {% for answer in answers_set %}
+            {% if selected_answer == answer %}
+                <input type="radio" name="answer" id="answer{{forloop.counter}}" value="{{answer}}" checked>
+            {% else %}
+                <input type="radio" name="answer" id="answer{{forloop.counter}}" value="{{answer}}">
+            {% endif %}
+            <label for="answer{{forloop.counter}}">{{answer}}</label><br>
+        {% endfor %}
+</fieldset>
+</form>
+{% if question.question_number|add:'-1' >= 1 %}
+    <a href="{% url 'kalm_quizes:single_choice_page' quiz.id question.question_number|add:'-1' %}">Предыдущий</a>
+{% endif %}
+<input type="submit" value="Ответить" form="s">
+{% if question.question_number|add:'1' <= quiz.single_choice_count %}
+    <a href="{% url 'kalm_quizes:single_choice_page' quiz.id question.question_number|add:'1' %}">Следующий</a>
+{% else %}
+    <a href="{% url 'kalm_quizes:put_in_order_page' quiz.id question.question_number|add:'1' %}">Следующий</a>
+{% endif %}
+<hr>
+<a href="{% url 'kalm_quizes:quiz_page' quiz.id %}">Cтраница курса</a>
+
+<p>{{answer_status.result}}</p>
+
+{% endblock %}

@@ -1,0 +1,80 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+	<title>{{title}}</title>
+	<link type="text/css" href="{% static 'kalm_quizes/css/styles.css' %}" rel="stylesheet" />
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<link rel="shortcut icon" href="{% static 'kalm_quizes/img/main.ico' %}" type="image/x-icon"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<table class="table-page" border="1" cellpadding="0" cellspacing="0">
+<tr><td valign=top>
+{% block mainmenu %}
+		<div class="header">
+			<ul id="mainmenu" class="mainmenu">
+				<li class="logo"><a href=''><div class="logo"></div></a></li>
+				<li><a href="{% url 'kalm_quizes:index' %}">Главная</a></li>
+				<li><a href="{% url 'kalm_quizes:glossary' %}">Глоссарий</a></li>
+				<li><a href="{% url 'kalm_quizes:about' %}">О проекте</a></li>
+				{% if request.user.is_authenticated %}
+					<li class="last"> <a href="{% url 'kalm_quizes:profile' %}">Пользователь: {{user.username}}</a> | <a href="{% url 'logout' %}">Выйти</a></li>
+				{% else %}
+					<li class="last"><a href="{% url 'kalm_quizes:register' %}">Регистрация</a> | <a href="{% url 'login' %}">Войти</a></li>
+				{% endif %}
+
+			</ul>
+			<div class="clear"></div>
+		</div>
+{% endblock mainmenu %}
+
+
+<table class="table-content" border=0 cellpadding="0" cellspacing="0">
+<tr>
+<!-- Sidebar слева -->
+	<td valign="top" class="left-chapters">
+		{% if quiz and request.user.is_authenticated %}
+			<h4>Прогресс по курсу</h4>
+				<ul id="leftchapters">{% for course, stat in quizes_stat %}
+					{% if course.quiz_number == quiz.quiz_number %}
+						{{stat}} /{{course.get_count_all}}
+					{% endif %}
+    			{% endfor %}</ul>
+
+		{% else %}
+		<ul id="leftchapters">
+			<li>Нужен</li>
+			<li>ли</li>
+			<li>здесь</li>
+			<li>сайдбар?</li>
+			<li><input type="search" id="search" name="search"></li>
+		</ul>
+		{% endif %}
+	</td>
+<!-- Конец Sidebar'а -->
+<td valign="top" class="content">
+	<!-- Хлебные крошки -->
+	{% block breadcrumbs %}
+	{% endblock %}
+
+<!-- Блок контента -->
+	<div class="content-text">
+{% block content %}
+{% endblock %}
+	</div>
+<!-- Конец блока контента -->
+
+</td></tr></table>
+</td></tr>
+<!-- Footer -->
+<tr><td valign=top>
+	<div id="footer">
+		<p>&copy; 2022 Частичное или полное копирование информации с данного сайта для распространения на других ресурсах, в том числе и бумажных, строго запрещено.</p>
+	</div>
+</td></tr></table>
+<!-- Конец footer'а и страницы -->
+</body>
+</html>
