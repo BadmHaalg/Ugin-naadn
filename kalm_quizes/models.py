@@ -29,12 +29,11 @@ class Quiz(models.Model):
         count_all = self.single_choice_count() + self.put_in_order_count() + self.put_in_gaps_count()
         return count_all
 
-    # def get_all_related(self):
-    #     single_choice_list = self.singlechoice_set.all()
-    #     put_in_order_list = self.putinorder_set.all()
-    #     put_in_gaps_list = self.putingaps_set.all()
-    #     sum = single_choice_list + put_in_gaps_list + put_in_order_list
-    #     return sum
+    def get_all_related(self): #Можно ли QuerySet перевести в список?
+        single_choice_list = [obj for obj in self.singlechoice_set.all()]
+        put_in_order_list = [obj for obj in self.putinorder_set.all()]
+        put_in_gaps_list = [obj for obj in self.putingaps_set.all()]
+        return single_choice_list + put_in_order_list + put_in_gaps_list
 
     class Meta:
         verbose_name = 'Курс'
@@ -53,6 +52,13 @@ class SingleChoice(models.Model):
     def __str__(self):
         return f'{self.question_number}. {self.question_text}'
 
+    def type(self):
+        return 'SingleChoice'
+
+    def url(self):
+        url = "{% url 'kalm_quizes:single_choice_page' 1 1 %}"
+        return url
+
     class Meta:
         verbose_name = 'Вопрос с одним вариантом ответа'
         verbose_name_plural = 'Вопросы с одним вариантом ответа'
@@ -68,6 +74,9 @@ class PutInGaps(models.Model):
     def __str__(self):
         return f'{self.question_number}. {self.question_text}'
 
+    def type(self):
+        return 'PutInGaps'
+
     class Meta:
         verbose_name = 'Задание на заполнение пропусков'
         verbose_name_plural = 'Задания для заполнения пропусков'
@@ -81,6 +90,9 @@ class PutInOrder(models.Model):
 
     def __str__(self):
         return f'{self.question_number}. {self.question_text}'
+
+    def type(self):
+        return 'PutInOrder'
 
     class Meta:
         verbose_name = 'Задание на порядок слов'

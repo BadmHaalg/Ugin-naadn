@@ -5,8 +5,7 @@
 {% endblock %}
 
 {% block content %}
-{% if message %}<h2>{{ message}}</h2>
-    {% endif %}
+
 <form action="{% url 'kalm_quizes:single_choice_page' quiz.id question.question_number %}" method="post" id="s">
     {% csrf_token %}
     <fieldset>
@@ -21,6 +20,7 @@
             <label for="answer{{forloop.counter}}">{{answer}}</label><br>
         {% endfor %}
 </fieldset>
+
 </form>
 {% if question.question_number|add:'-1' >= 1 %}
     <a href="{% url 'kalm_quizes:single_choice_page' quiz.id question.question_number|add:'-1' %}">Предыдущий</a>
@@ -34,6 +34,17 @@
 <hr>
 <a href="{% url 'kalm_quizes:quiz_page' quiz.id %}">Cтраница курса</a>
 
-<p>{{answer_status.result}}</p>
+   {% if message %}<h2>{{ message}}</h2>
+    {% endif %}
+<p>Короче переписать навигацию между вопросами - внутри списка related.</p>
+<p>Наверное надо бы еще шаблоны почистить, для страниц вопросов сделать отдельный шаблон.</p>
+<p>А вообще суть не в том, что нужно внутри списка двигаться, а в том, чтобы получить ссылки на соседей
+    при условии их существования. Проблема опять в том, что я заранее не знаю, какого именно типа будет обьект,
+    а от этого зависит на какую ссылку его направить. Полиморфичными фичами пахнет.
+    Было бы неплохо вне зависимости от типа направлять на одну ссылку. Много ведь общего у функций.
+    Может просто сделать одну большую и направлять в нее а там уже ветвиться? Декораторы вот только
+    сломаются кажется.</p>
+
+
 
 {% endblock %}

@@ -1,7 +1,7 @@
 {% extends 'kalm_quizes/base_template_1.html' %}
 
 {% block content %}
-<h1>Переведите и расставьте слова по порядку:</h1><br>
+<h1>Задание на порядок</h1><br>
 <form action="{% url 'kalm_quizes:put_in_order_page' quiz.id question.question_number %}" method="post" id="s">
     {% csrf_token %}
     <fieldset>
@@ -36,7 +36,7 @@
 <a href="{% url 'kalm_quizes:quiz_page' quiz.id %}">Cтраница курса</a>
 
 
-<h2>результат - {{message}}</h2>
-<h3>{{answer_status.result}}</h3>
+<h2>{{message}}</h2>
+
 
 {% endblock %}

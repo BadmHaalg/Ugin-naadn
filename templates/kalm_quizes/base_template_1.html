@@ -42,14 +42,22 @@
 					{% if course.quiz_number == quiz.quiz_number %}
 						{{stat}} /{{course.get_count_all}}
 					{% endif %}
-    			{% endfor %}</ul>
+    			{% endfor %}
+					{% if question %}
+						 {% for obj in quiz.get_all_related %}
+								{% if obj.type == 'SingleChoice' %}
+									 <li><a href="{% url 'kalm_quizes:single_choice_page' quiz.id obj.question_number %}">Вопрос №{{ obj.question_number }}</a></li>
+								{% elif obj.type == 'PutInOrder' %}
+									  <li><a href="{% url 'kalm_quizes:put_in_order_page' quiz.id obj.question_number %}">Вопрос №{{ obj.question_number }}</a></li>
+								{% elif obj.type == 'PutInGaps' %}
+									 <li><a href="{% url 'kalm_quizes:put_in_gaps_page' quiz.id obj.question_number %}">Вопрос №{{ obj.question_number }}</a></li>
+								{% endif %}
+						{% endfor %}
+					{% endif %}
+				</ul>
 
 		{% else %}
-		<ul id="leftchapters">
-			<li>Нужен</li>
-			<li>ли</li>
-			<li>здесь</li>
-			<li>сайдбар?</li>
+		<ul id="leftchapters1">
 			<li><input type="search" id="search" name="search"></li>
 		</ul>
 		{% endif %}

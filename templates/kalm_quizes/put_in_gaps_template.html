@@ -5,29 +5,29 @@
 {% endblock %}
 
 {% block content %}
-
-<p>
-{% for el in text_split %}
-    {% if el == '___' %}
-        {% if words_dict %}
-            {% get_dict_val words_dict forloop.counter as selected_word %}
+<h3>Заполните пропуски подходящими по смыслу словами</h3>
+{% autoescape off %}
+    {% for el in text_split %}
+        {% if el == '___' %}
+            {% if words_dict %}
+                {% get_dict_val words_dict forloop.counter as selected_word %}
+            {% endif %}
+            <select name="{{forloop.counter}}" form="this">
+                <option value="none"></option>
+                {% for word in choices_list %}
+                    {% if word == selected_word %}
+                        <option value="{{word}}" selected>{{word}}</option>
+                    {% else %}
+                        <option value="{{word}}">{{word}}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        {% else %}
+            {{el}}
         {% endif %}
-        <select name="{{forloop.counter}}" form="this">
-            <option value="none"></option>
-            {% for word in choices_list %}
-                {% if word == selected_word %}
-                    <option value="{{word}}" selected>{{word}}</option>
-                {% else %}
-                    <option value="{{word}}">{{word}}</option>
-                {% endif %}
-            {% endfor %}
-        </select>
-    {% else %}
-        {{el}}
-    {% endif %}
+    {% endfor %}
+{% endautoescape %}
 
-{% endfor %}
-</p>
 <form action="{% url 'kalm_quizes:put_in_gaps_page' quiz.id question.question_number %}" method="post" id="this">
     {% csrf_token %}
 </form>
@@ -45,5 +45,5 @@
 <a href="{% url 'kalm_quizes:quiz_page' quiz.id %}">Cтраница курса</a>
 
 <h1>{{message}}</h1>
-<h3>{{answer_status.result}}</h3>
+
 {% endblock %}
