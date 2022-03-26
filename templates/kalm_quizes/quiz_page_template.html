@@ -31,13 +31,7 @@
 
     {% for obj in quiz.get_all_related %}
         <ul>
-            {% if obj.type == 'SingleChoice' %}
-                 <li><a href="{% url 'kalm_quizes:single_choice_page' quiz.id obj.question_number %}">Вопрос №{{ obj.question_number}}</a></li>
-            {% elif obj.type == 'PutInOrder' %}
-                  <li><a href="{% url 'kalm_quizes:put_in_order_page' quiz.id obj.question_number %}">Вопрос №{{ obj.question_number }}</a></li>
-            {% elif obj.type == 'PutInGaps' %}
-                 <li><a href="{% url 'kalm_quizes:put_in_gaps_page' quiz.id obj.question_number %}">Вопрос №{{ obj.question_number }}</a></li>
-            {% endif %}
+            <li><a href="{{obj.get_absolute_url}}">Вопрос №{{obj.question_number}}. {{obj.type}}</a></li>
         </ul>
     {% endfor %}
 {% endblock %}

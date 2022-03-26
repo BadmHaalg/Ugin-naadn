@@ -1,0 +1,32 @@
+{% extends 'kalm_quizes/base_template_1.html' %}
+{% load quizes_extras %}
+
+{% block content %}
+<h1>Ответьте на вопросы по данному тексту</h1>
+
+<form action="">
+    {% csrf_token %}
+    <p>{{question.top_text.text}}</p>
+    <fieldset>
+        <legend><h4>{{question.question_text}}</h4></legend>
+         {% for answer in answers_set %}
+            <input type="radio" name="answer" id="answer{{forloop.counter}}" value="{{answer}}">
+              <label for="answer{{forloop.counter}}">{{answer}}</label><br>
+         {% endfor %}
+    </fieldset>
+</form>
+
+{% if 0 <= question.question_number|add:'-2'  %}
+    {% get_list_element quiz.get_all_related question.question_number|add:'-2' as left %}
+{% endif %}
+{% get_list_element quiz.get_all_related question.question_number as right %}
+
+<p>{% if left %}<a href="{{left.get_absolute_url}}">Назад|</a> {%  endif %}
+<input type="submit" value="Ответить">
+{% if right %}<a href="{{right.get_absolute_url}}">|Вперед</a>{% endif %}</p>
+
+
+{% endblock %}
+
+
+

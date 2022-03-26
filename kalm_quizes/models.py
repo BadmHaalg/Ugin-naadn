@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+
 # Create your models here.
 
 
@@ -29,11 +30,15 @@ class Quiz(models.Model):
         count_all = self.single_choice_count() + self.put_in_order_count() + self.put_in_gaps_count()
         return count_all
 
-    def get_all_related(self): #Можно ли QuerySet перевести в список?
+    def get_all_related(self):  # Можно ли QuerySet перевести в список?
         single_choice_list = [obj for obj in self.singlechoice_set.all()]
         put_in_order_list = [obj for obj in self.putinorder_set.all()]
         put_in_gaps_list = [obj for obj in self.putingaps_set.all()]
-        return single_choice_list + put_in_order_list + put_in_gaps_list
+        tt_list = [obj for obj in self.testfortext_set.all()]
+        questions = single_choice_list + tt_list + put_in_order_list + put_in_gaps_list
+        questions_sorted = sorted(questions, key=lambda obj: obj.question_number)
+        # здесь было бы неплохо список отсортировать на месте вообще-то по question_number
+        return questions_sorted
 
     class Meta:
         verbose_name = 'Курс'
@@ -55,9 +60,8 @@ class SingleChoice(models.Model):
     def type(self):
         return 'SingleChoice'
 
-    def url(self):
-        url = "{% url 'kalm_quizes:single_choice_page' 1 1 %}"
-        return url
+    def get_absolute_url(self):
+        return f"/course{self.quiz_id}/singlechoice{self.question_number}/"
 
     class Meta:
         verbose_name = 'Вопрос с одним вариантом ответа'
@@ -77,6 +81,9 @@ class PutInGaps(models.Model):
     def type(self):
         return 'PutInGaps'
 
+    def get_absolute_url(self):
+        return f"/course{self.quiz_id}/gaps{self.question_number}/"
+
     class Meta:
         verbose_name = 'Задание на заполнение пропусков'
         verbose_name_plural = 'Задания для заполнения пропусков'
@@ -94,9 +101,40 @@ class PutInOrder(models.Model):
     def type(self):
         return 'PutInOrder'
 
+    def get_absolute_url(self):
+        return f"/course{self.quiz_id}/ordering{self.question_number}/"
+
     class Meta:
         verbose_name = 'Задание на порядок слов'
         verbose_name_plural = 'Задания на порядок слов'
+
+
+class TextForTest(models.Model):
+    text = models.TextField()
+
+    def type(self):
+        return 'TextForTest'
+
+
+class TestForText(models.Model):
+    top_text = models.ForeignKey(TextForTest, on_delete=models.CASCADE)
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
+    question_number = models.IntegerField(default=0)
+    question_text = models.TextField(unique=True)
+    right_answer = models.CharField(max_length=100)
+    wrong_answer_1 = models.CharField(max_length=100)
+    wrong_answer_2 = models.CharField(max_length=100)
+    wrong_answer_3 = models.CharField(max_length=100)
+
+    def type(self):
+        return 'TestForText'
+
+    def get_absolute_url(self):
+        return f"/course{self.quiz.pk}/testfortext{self.question_number}/"
+
+    class Meta:
+        verbose_name = 'Задание на понимание текста'
+        verbose_name_plural = 'Задания на понимание текста'
 
 
 class UserCourseProfile(models.Model):
@@ -109,11 +147,3 @@ class UserCourseAnswers(models.Model):
     quiz = models.IntegerField()
     question = models.IntegerField(default=0)
     result = models.IntegerField(default=0)
-
-
-
-
-
-
-
-

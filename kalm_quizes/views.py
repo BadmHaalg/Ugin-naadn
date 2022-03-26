@@ -166,13 +166,13 @@ def quiz_page(request, quiz_id, profile):
 #
 # def prosloika(request, quiz_id, question_id):
 #     quiz = get_object_or_404(Quiz, pk=quiz_id)
-#     question = [obj for obj in quiz.get_all_related() if obj.question_number == question_id][0]
+#     question = [obj for obj in quiz.get_all_related() if obj.question_number == question_id][0]#не катит так
 #     if question.type == 'SingleChoice':
-#         return single_choice_page(request, quiz_id, question_id)
-#     elif question.type == 'PutInOrder':
-#         return put_in_order_page(request, quiz_id, question_id)
-#     elif question.type == 'PutInGaps':
-#         return put_in_gaps_page(request, quiz_id, question_id)
+#         pass
+    # elif question.type == 'PutInOrder':
+    #     return put_in_order_page(request, quiz_id, question_id)
+    # elif question.type == 'PutInGaps':
+    #     return put_in_gaps_page(request, quiz_id, question_id)
 
 
 @answer_decorator
@@ -210,6 +210,26 @@ def single_choice_page(request, quiz_id, question_id, answer_status):
             context['message'] = 'Вы не выбрали ответ!'
 
     return render(request, 'kalm_quizes/single_choice_template.html', context)
+
+
+def tt_page(request, quiz_id, question_id):
+    quiz = get_object_or_404(Quiz, pk=quiz_id)
+    question = quiz.testfortext_set.get(question_number=question_id)
+    answers_set = [question.right_answer, question.wrong_answer_1,
+                   question.wrong_answer_2, question.wrong_answer_3]
+    context = {
+        'menu': menu,
+        'quiz': quiz,
+        'question': question,
+        'answers_set': answers_set,
+        'single_choice_count': quiz.single_choice_count,  # это кажется можно заменить
+        'put_in_order_count': quiz.put_in_order_count,
+        'put_in_gaps_count': quiz.put_in_gaps_count,
+        'sum': quiz.get_count_all,
+        'quizes_stat': get_quiz_stat(request)
+    }
+
+    return render(request, 'kalm_quizes/tt_template.html', context)
 
 
 @answer_decorator
@@ -297,5 +317,3 @@ class RegisterUser(generic.CreateView):
     form_class = RegisterUserForm
     template_name = 'registration/register.html'
     success_url = reverse_lazy('login')
-
-#попробуем написать функцию прослойку?

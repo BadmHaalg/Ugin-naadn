@@ -11,4 +11,8 @@ def get_dict_val(dict:dict, key):
 
 @register.simple_tag
 def get_list_element(list, index):
-    return list[index]
+    try:
+        back = list[index]
+    except (IndexError):
+        back = None
+    return back

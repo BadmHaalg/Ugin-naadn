@@ -19,12 +19,18 @@ class PutInOrderInline(admin.StackedInline):
     extra = 0
 
 
+class TestForTextInline(admin.StackedInline):
+    model = TestForText
+    extra = 0
+
+
 class QuizAdmin(admin.ModelAdmin):
     fields = ['quiz_number', 'quiz_name']
-    inlines = [SingleChoiceInline, PutInOrderInline, PutInGapsInline]
+    inlines = [SingleChoiceInline, TestForTextInline, PutInOrderInline, PutInGapsInline]
     list_display = ('quiz_number', 'quiz_name')
     list_filter = ['quiz_number']
 
 
 admin.site.register(Quiz, QuizAdmin)
+admin.site.register(TextForTest)
 

@@ -15,4 +15,6 @@ urlpatterns = [
          views.put_in_order_page, name='put_in_order_page'),
     path('course<int:quiz_id>/gaps<int:question_id>/',
          views.put_in_gaps_page, name='put_in_gaps_page'),
+    path('course<int:quiz_id>/testfortext<int:question_id>/',
+         views.tt_page, name='tt'),
     ]

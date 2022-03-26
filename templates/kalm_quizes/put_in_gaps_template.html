@@ -31,19 +31,19 @@
 <form action="{% url 'kalm_quizes:put_in_gaps_page' quiz.id question.question_number %}" method="post" id="this">
     {% csrf_token %}
 </form>
+{% if 0 <= question.question_number|add:'-2'  %}
+    {% get_list_element quiz.get_all_related question.question_number|add:'-2' as left %}
+{% endif %}
+{% get_list_element quiz.get_all_related question.question_number as right %}
 
-{% if question.question_number|add:'-1' > single_choice_count|add:put_in_order_count %}
-    <a href="{% url 'kalm_quizes:put_in_gaps_page' quiz.id question.question_number|add:'-1' %}">Предыдущий</a>
-{% else %}
-    <a href="{% url 'kalm_quizes:put_in_order_page' quiz.id question.question_number|add:'-1' %}">Предыдущий</a>
-{% endif %}
+<p>{% if left %}<a href="{{left.get_absolute_url}}">Назад|</a> {%  endif %}
 <input type="submit" value="Ответить" form="this">
-{% if question.question_number < sum %}
-    <a href="{% url 'kalm_quizes:put_in_gaps_page' quiz.id question.question_number|add:'1' %}">Следующий</a>
-{% endif %}
+{% if right %}<a href="{{right.get_absolute_url}}">|Вперед</a>{% endif %}</p>
 <hr>
 <a href="{% url 'kalm_quizes:quiz_page' quiz.id %}">Cтраница курса</a>
 
 <h1>{{message}}</h1>
+
+
 
 {% endblock %}

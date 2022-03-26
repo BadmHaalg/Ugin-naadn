@@ -1,4 +1,5 @@
 {% extends 'kalm_quizes/base_template_1.html' %}
+{% load quizes_extras %}
 
 {% block content %}
 <h1>Задание на порядок</h1><br>
@@ -21,17 +22,14 @@
     </fieldset>
 </form>
 
-{% if question.question_number > quiz.single_choice_count|add:'1' %}
-    <a href="{% url 'kalm_quizes:put_in_order_page' quiz.id question.question_number|add:'-1' %}">Предыдущий</a>
-{% else %}
-    <a href="{% url 'kalm_quizes:single_choice_page' quiz.id question.question_number|add:'-1' %}">Предыдущий</a>
+{% if 0 <= question.question_number|add:'-2'  %}
+    {% get_list_element quiz.get_all_related question.question_number|add:'-2' as left %}
 {% endif %}
+{% get_list_element quiz.get_all_related question.question_number as right %}
+
+<p>{% if left %}<a href="{{left.get_absolute_url}}">Назад|</a> {%  endif %}
 <input type="submit" value="Ответить" form="s">
-{% if question.question_number|add:put_in_gaps_count != sum %}
-    <a href="{% url 'kalm_quizes:put_in_order_page' quiz.id question.question_number|add:'1' %}">Следующий</a>
-{% else %}
-    <a href="{% url 'kalm_quizes:put_in_gaps_page' quiz.id question.question_number|add:'1' %}">Следующий</a>
-{% endif %}
+{% if right %}<a href="{{right.get_absolute_url}}">|Вперед</a>{% endif %}</p>
 <hr>
 <a href="{% url 'kalm_quizes:quiz_page' quiz.id %}">Cтраница курса</a>
 

@@ -1,4 +1,5 @@
 {% extends 'kalm_quizes/base_template_1.html' %}
+{% load quizes_extras %}
 
 {% block head %}
     <title>Задание № {{ question.question_number }}</title>
@@ -22,29 +23,18 @@
 </fieldset>
 
 </form>
-{% if question.question_number|add:'-1' >= 1 %}
-    <a href="{% url 'kalm_quizes:single_choice_page' quiz.id question.question_number|add:'-1' %}">Предыдущий</a>
+{% if 0 <= question.question_number|add:'-2'  %}
+    {% get_list_element quiz.get_all_related question.question_number|add:'-2' as left %}
 {% endif %}
+{% get_list_element quiz.get_all_related question.question_number as right %}
+
+<p>{% if left %}<a href="{{left.get_absolute_url}}">Назад|</a> {%  endif %}
 <input type="submit" value="Ответить" form="s">
-{% if question.question_number|add:'1' <= quiz.single_choice_count %}
-    <a href="{% url 'kalm_quizes:single_choice_page' quiz.id question.question_number|add:'1' %}">Следующий</a>
-{% else %}
-    <a href="{% url 'kalm_quizes:put_in_order_page' quiz.id question.question_number|add:'1' %}">Следующий</a>
-{% endif %}
+{% if right %}<a href="{{right.get_absolute_url}}">|Вперед</a>{% endif %}</p>
 <hr>
 <a href="{% url 'kalm_quizes:quiz_page' quiz.id %}">Cтраница курса</a>
 
    {% if message %}<h2>{{ message}}</h2>
     {% endif %}
-<p>Короче переписать навигацию между вопросами - внутри списка related.</p>
-<p>Наверное надо бы еще шаблоны почистить, для страниц вопросов сделать отдельный шаблон.</p>
-<p>А вообще суть не в том, что нужно внутри списка двигаться, а в том, чтобы получить ссылки на соседей
-    при условии их существования. Проблема опять в том, что я заранее не знаю, какого именно типа будет обьект,
-    а от этого зависит на какую ссылку его направить. Полиморфичными фичами пахнет.
-    Было бы неплохо вне зависимости от типа направлять на одну ссылку. Много ведь общего у функций.
-    Может просто сделать одну большую и направлять в нее а там уже ветвиться? Декораторы вот только
-    сломаются кажется.</p>
-
-
 
 {% endblock %}
