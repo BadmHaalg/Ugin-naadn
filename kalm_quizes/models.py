@@ -27,8 +27,8 @@ class Quiz(models.Model):
         return count
 
     def get_count_all(self):
-        count_all = self.single_choice_count() + self.put_in_order_count() + self.put_in_gaps_count()
-        return count_all
+        # count_all = self.single_choice_count() + self.put_in_order_count() + self.put_in_gaps_count()
+        return len(self.get_all_related())
 
     def get_all_related(self):  # Можно ли QuerySet перевести в список?
         single_choice_list = [obj for obj in self.singlechoice_set.all()]

@@ -163,16 +163,6 @@ def quiz_page(request, quiz_id, profile):
 #     elif question.type() == 'PutInGaps':
 #         pass
 
-#
-# def prosloika(request, quiz_id, question_id):
-#     quiz = get_object_or_404(Quiz, pk=quiz_id)
-#     question = [obj for obj in quiz.get_all_related() if obj.question_number == question_id][0]#не катит так
-#     if question.type == 'SingleChoice':
-#         pass
-    # elif question.type == 'PutInOrder':
-    #     return put_in_order_page(request, quiz_id, question_id)
-    # elif question.type == 'PutInGaps':
-    #     return put_in_gaps_page(request, quiz_id, question_id)
 
 
 @answer_decorator
@@ -188,10 +178,10 @@ def single_choice_page(request, quiz_id, question_id, answer_status):
         'quiz': quiz,
         'question': question,
         'answers_set': answers_set,
-        'single_choice_count': quiz.single_choice_count, #это кажется можно заменить
-        'put_in_order_count': quiz.put_in_order_count,
-        'put_in_gaps_count': quiz.put_in_gaps_count,
-        'sum': quiz.get_count_all,
+        # # 'single_choice_count': quiz.single_choice_count, #это кажется можно заменить
+        # # 'put_in_order_count': quiz.put_in_order_count,
+        # # 'put_in_gaps_count': quiz.put_in_gaps_count,
+        # 'sum': quiz.get_count_all,
         'answer_status': answer_status,
         'quizes_stat': get_quiz_stat(request)
     }
@@ -211,8 +201,8 @@ def single_choice_page(request, quiz_id, question_id, answer_status):
 
     return render(request, 'kalm_quizes/single_choice_template.html', context)
 
-
-def tt_page(request, quiz_id, question_id):
+@answer_decorator
+def tt_page(request, quiz_id, question_id, answer_status):
     quiz = get_object_or_404(Quiz, pk=quiz_id)
     question = quiz.testfortext_set.get(question_number=question_id)
     answers_set = [question.right_answer, question.wrong_answer_1,
@@ -226,8 +216,23 @@ def tt_page(request, quiz_id, question_id):
         'put_in_order_count': quiz.put_in_order_count,
         'put_in_gaps_count': quiz.put_in_gaps_count,
         'sum': quiz.get_count_all,
-        'quizes_stat': get_quiz_stat(request)
+        'answer_status': answer_status,
+        'quizes_stat': get_quiz_stat(request),
     }
+
+    if request.method == 'POST':
+        try:
+            selected_answer = request.POST['answer']
+            context['selected_answer'] = selected_answer
+            if selected_answer == question.right_answer:
+                context['message'] = 'Правильно!'
+                if request.user.is_authenticated:
+                    answer_status.result = '1'
+                    answer_status.save()
+            else:
+                context['message'] = 'Пока неправильно, пробуйте еще!'
+        except MultiValueDictKeyError:
+            context['message'] = 'Вы не выбрали ответ!'
 
     return render(request, 'kalm_quizes/tt_template.html', context)
 
