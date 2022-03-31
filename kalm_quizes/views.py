@@ -118,51 +118,15 @@ def answer_decorator(question_page):
 def quiz_page(request, quiz_id, profile):
     """страница курса"""
     quiz = get_object_or_404(Quiz, pk=quiz_id)
-    single_choices_list = quiz.singlechoice_set.all()
-    put_in_gaps_list = quiz.putingaps_set.all()
-    put_in_order_list = quiz.putinorder_set.all()
     context = {
         'menu': menu,
         'quiz': quiz,
-        'single_choices_list': single_choices_list,
-        'put_in_order_list': put_in_order_list,
-        'put_in_gaps_list': put_in_gaps_list,
         'profile': profile,
         'quizes_stat': get_quiz_stat(request)
 
     }
 
     return render(request, 'kalm_quizes/quiz_page_template.html', context)
-
-
-# @answer_decorator
-# def one_big_function(request, quiz_id, question_id, answer_status):
-#     quiz = get_object_or_404(Quiz, pk=quiz_id)
-#     question = [obj for obj in quiz.get_all_related()
-#                 if obj.question_number == question_id]
-#
-#     context = {
-#         'menu': menu,
-#         'quiz': quiz,
-#         'question': question,
-#         'single_choice_count': quiz.single_choice_count,  # это кажется можно заменить
-#         'put_in_order_count': quiz.put_in_order_count,
-#         'put_in_gaps_count': quiz.put_in_gaps_count,
-#         'sum': quiz.get_count_all,
-#         'answer_status': answer_status,
-#         'quizes_stat': get_quiz_stat(request),
-#     }
-#
-#     if question.type() == 'SingleChoice':
-#         answers_set = [question.right_answer, question.wrong_answer_1,
-#                        question.wrong_answer_2, question.wrong_answer_3]
-#         context['answers_set'] = answers_set
-#         pass
-#     elif question.type() == 'PutInOrder':
-#         pass
-#     elif question.type() == 'PutInGaps':
-#         pass
-
 
 
 @answer_decorator
@@ -178,10 +142,6 @@ def single_choice_page(request, quiz_id, question_id, answer_status):
         'quiz': quiz,
         'question': question,
         'answers_set': answers_set,
-        # # 'single_choice_count': quiz.single_choice_count, #это кажется можно заменить
-        # # 'put_in_order_count': quiz.put_in_order_count,
-        # # 'put_in_gaps_count': quiz.put_in_gaps_count,
-        # 'sum': quiz.get_count_all,
         'answer_status': answer_status,
         'quizes_stat': get_quiz_stat(request)
     }
@@ -201,6 +161,7 @@ def single_choice_page(request, quiz_id, question_id, answer_status):
 
     return render(request, 'kalm_quizes/single_choice_template.html', context)
 
+
 @answer_decorator
 def tt_page(request, quiz_id, question_id, answer_status):
     quiz = get_object_or_404(Quiz, pk=quiz_id)
@@ -212,9 +173,6 @@ def tt_page(request, quiz_id, question_id, answer_status):
         'quiz': quiz,
         'question': question,
         'answers_set': answers_set,
-        'single_choice_count': quiz.single_choice_count,  # это кажется можно заменить
-        'put_in_order_count': quiz.put_in_order_count,
-        'put_in_gaps_count': quiz.put_in_gaps_count,
         'sum': quiz.get_count_all,
         'answer_status': answer_status,
         'quizes_stat': get_quiz_stat(request),
@@ -250,10 +208,6 @@ def put_in_order_page(request, quiz_id, question_id, answer_status):
         'text': words_set,
         'range': range(len(words_set)),
         'request': request,
-        'single_choice_count': quiz.single_choice_count,
-        'put_in_order_count': quiz.put_in_order_count,
-        'put_in_gaps_count': quiz.put_in_gaps_count,
-        'sum': quiz.get_count_all,
         'answer_status': answer_status,
         'quizes_stat': get_quiz_stat(request)
     }
@@ -289,10 +243,6 @@ def put_in_gaps_page(request, quiz_id, question_id, answer_status):
         'choices_list': choices_list,
         'text_split': question.question_text.split(),
         'request': request,
-        'single_choice_count': quiz.single_choice_count,
-        'put_in_order_count': quiz.put_in_order_count,
-        'put_in_gaps_count': quiz.put_in_gaps_count,
-        'sum': quiz.get_count_all,
         'answer_status': answer_status,
         'quizes_stat': get_quiz_stat(request)
     }

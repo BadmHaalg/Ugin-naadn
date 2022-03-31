@@ -28,12 +28,12 @@
 <p>{% if left %}<a href="{{left.get_absolute_url}}">Назад|</a> {%  endif %}
 <input type="submit" value="Ответить" form="s">
 {% if right %}<a href="{{right.get_absolute_url}}">|Вперед</a>{% endif %}</p>
+<hr>
+<a href="{% url 'kalm_quizes:quiz_page' quiz.id %}">Cтраница курса</a>
+
 
 <h4>{{message}}</h4>
 
-<p>{{answer_status.result}}</p>
-<p>{{answer_status}}</p>
-<p>{{quizes_stat}}</p>
 {% endblock %}
 
 

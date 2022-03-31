@@ -55,7 +55,7 @@ class SingleChoice(models.Model):
     wrong_answer_3 = models.CharField(max_length=100)
 
     def __str__(self):
-        return f'{self.question_number}. {self.question_text}'
+        return f'{self.question_number}. {self.type()}'
 
     def type(self):
         return 'SingleChoice'
@@ -76,7 +76,7 @@ class PutInGaps(models.Model):
     choices_list = models.CharField(max_length=225, default='')
 
     def __str__(self):
-        return f'{self.question_number}. {self.question_text}'
+        return f'{self.question_number}. {self.type()}'
 
     def type(self):
         return 'PutInGaps'
@@ -96,7 +96,7 @@ class PutInOrder(models.Model):
     text_for_ordering = models.TextField(default='')
 
     def __str__(self):
-        return f'{self.question_number}. {self.question_text}'
+        return f'{self.question_number}. {self.type()}'
 
     def type(self):
         return 'PutInOrder'
@@ -125,6 +125,9 @@ class TestForText(models.Model):
     wrong_answer_1 = models.CharField(max_length=100)
     wrong_answer_2 = models.CharField(max_length=100)
     wrong_answer_3 = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f'{self.question_number}. {self.type()}'
 
     def type(self):
         return 'TestForText'

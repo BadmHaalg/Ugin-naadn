@@ -2,12 +2,9 @@
 
 {% block content %}
 <h1>Профиль пользователя {{user.username}}</h1>
-<p>user.is_authenticated: {{user.is_authenticated}}</p>
-<p>user.pk: {{user.pk}}</p>
-<p>user.username: {{user.username}}</p>
-<p>user.first_name: {{user.first_name}}</p>
-<p>user.last_name: {{user.last_name}}</p>
-<p>user.is_staff: {{user.is_staff}}</p>
+<p>Никнейм пользователя: {{user.username}}</p>
+<p>Имя пользователя: {{user.first_name}}</p>
+<p>Фамилия: {{user.last_name}}</p>
 <p></p>
 <h3>Список начатых курсов:</h3>
 <ul>
@@ -15,5 +12,4 @@
         <li><a href="{% url 'kalm_quizes:quiz_page' quiz.id %}">{{quiz.quiz_name}}</a> | Решено: {{stat}} /{{quiz.get_count_all}}</li>
     {% endfor %}
 </ul>
-<p>{{quizes_stat}}</p>
 {% endblock %}
