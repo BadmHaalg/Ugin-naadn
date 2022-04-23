@@ -112,6 +112,9 @@ class PutInOrder(models.Model):
 class TextForTest(models.Model):
     text = models.TextField()
 
+    def __str__(self):
+        return self.text
+
     def type(self):
         return 'TextForTest'
 
