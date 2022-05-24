@@ -1,4 +1,4 @@
-# quizes
+# Ugin naadn
 
 Сайт доступен по адресу http://www.uginnaadn.ru/
 
